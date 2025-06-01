@@ -5,7 +5,7 @@ export default function BlogPost({ params }) {
   // Örnek blog yazısı verisi
   const post = {
     id: params.id,
-    title: 'Ayasofya\'nın Gizli Tarihi ve Mimari Detayları',
+    title: 'Ayasofya&apos;nın Gizli Tarihi ve Mimari Detayları',
     content: `
       <p>Ayasofya, İstanbul'un en önemli tarihi yapılarından biri olarak, 1500 yıllık geçmişiyle bize eşsiz bir miras bırakıyor. Bu muhteşem yapı, Bizans döneminden Osmanlı'ya, oradan da günümüze uzanan bir köprü görevi görüyor.</p>
       
@@ -124,17 +124,17 @@ export default function BlogPost({ params }) {
               <Link href="/blog/2" className="group">
                 <div className="rounded-lg bg-white p-4 shadow-md transition hover:shadow-lg">
                   <h4 className="mb-2 text-lg font-semibold group-hover:text-blue-600">
-                    Topkapı Sarayı'nda Bir Gün
+                    Topkapı Sarayı&apos;nda Bir Gün
                   </h4>
-                  <p className="text-gray-600">Osmanlı'nın kalbinde unutulmaz bir gezi deneyimi</p>
+                  <p className="text-gray-600">Osmanlı&apos;nın kalbinde unutulmaz bir gezi deneyimi</p>
                 </div>
               </Link>
               <Link href="/blog/4" className="group">
                 <div className="rounded-lg bg-white p-4 shadow-md transition hover:shadow-lg">
                   <h4 className="mb-2 text-lg font-semibold group-hover:text-blue-600">
-                    Sultanahmet Camii'nin İhtişamı
+                    Sultanahmet Camii&apos;nin İhtişamı
                   </h4>
-                  <p className="text-gray-600">Mavi Camii'nin mimari detayları ve tarihi</p>
+                  <p className="text-gray-600">Mavi Camii&apos;nin mimari detayları ve tarihi</p>
                 </div>
               </Link>
             </div>

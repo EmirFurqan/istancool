@@ -5,8 +5,8 @@ export default function BlogPage() {
   const posts = [
     {
       id: 1,
-      title: 'Ayasofya\'nın Gizli Tarihi',
-      excerpt: '1500 yıllık tarihi ile Ayasofya\'nın bilinmeyen hikayeleri ve mimari detayları',
+      title: 'Ayasofya&apos;nın Gizli Tarihi',
+      excerpt: '1500 yıllık tarihi ile Ayasofya&apos;nın bilinmeyen hikayeleri ve mimari detayları',
       image: '/images/ayasofya.jpg',
       date: '23 Mart 2024',
       readTime: '5 dk',
@@ -14,8 +14,8 @@ export default function BlogPage() {
     },
     {
       id: 2,
-      title: 'Topkapı Sarayı\'nda Bir Gün',
-      excerpt: 'Osmanlı\'nın kalbinde unutulmaz bir gezi deneyimi ve sarayın gizli köşeleri',
+      title: 'Topkapı Sarayı&apos;nda Bir Gün',
+      excerpt: 'Osmanlı&apos;nın kalbinde unutulmaz bir gezi deneyimi ve sarayın gizli köşeleri',
       image: '/images/topkapi.jpg',
       date: '20 Mart 2024',
       readTime: '7 dk',
@@ -23,8 +23,8 @@ export default function BlogPage() {
     },
     {
       id: 3,
-      title: 'Galata Kulesi\'nden İstanbul Manzarası',
-      excerpt: 'İstanbul\'un en güzel manzarasını sunan tarihi kulenin hikayesi ve ziyaret rehberi',
+      title: 'Galata Kulesi&apos;nden İstanbul Manzarası',
+      excerpt: 'İstanbul&apos;un en güzel manzarasını sunan tarihi kulenin hikayesi ve ziyaret rehberi',
       image: '/images/galata.jpg',
       date: '18 Mart 2024',
       readTime: '6 dk',
@@ -32,8 +32,8 @@ export default function BlogPage() {
     },
     {
       id: 4,
-      title: 'Sultanahmet Camii\'nin İhtişamı',
-      excerpt: 'Mavi Camii olarak bilinen Sultanahmet Camii\'nin mimari detayları ve tarihi',
+      title: 'Sultanahmet Camii&apos;nin İhtişamı',
+      excerpt: 'Mavi Camii olarak bilinen Sultanahmet Camii&apos;nin mimari detayları ve tarihi',
       image: '/images/sultanahmet.jpg',
       date: '15 Mart 2024',
       readTime: '8 dk',
@@ -41,7 +41,7 @@ export default function BlogPage() {
     },
     {
       id: 5,
-      title: 'Kapalıçarşı\'da Alışveriş Rehberi',
+      title: 'Kapalıçarşı&apos;da Alışveriş Rehberi',
       excerpt: 'Dünyanın en büyük kapalı çarşılarından birinde alışveriş yapmanın püf noktaları',
       image: '/images/kapalicarsi.jpg',
       date: '12 Mart 2024',
@@ -50,7 +50,7 @@ export default function BlogPage() {
     },
     {
       id: 6,
-      title: 'İstanbul\'un En İyi Kahvaltı Mekanları',
+      title: 'İstanbul&apos;un En İyi Kahvaltı Mekanları',
       excerpt: 'Geleneksel Türk kahvaltısının en iyi sunulduğu mekanlar ve öneriler',
       image: '/images/ayasofya.jpg',
       date: '10 Mart 2024',
@@ -66,7 +66,7 @@ export default function BlogPage() {
         <div className="mb-12 text-center">
           <h1 className="mb-4 text-4xl font-bold">Blog</h1>
           <p className="text-lg text-gray-600">
-            İstanbul'un en güzel yerlerini ve hikayelerini keşfedin
+            İstanbul&apos;un en güzel yerlerini ve hikayelerini keşfedin
           </p>
         </div>
         
