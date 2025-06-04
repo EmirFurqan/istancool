@@ -1,146 +1,109 @@
+'use client';
+
+import { use, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import axios from 'axios';
 
-export default function BlogPost({ params }) {
-  // Örnek blog yazısı verisi
-  const post = {
-    id: params.id,
-    title: 'Ayasofya&apos;nın Gizli Tarihi ve Mimari Detayları',
-    content: `
-      <p>Ayasofya, İstanbul'un en önemli tarihi yapılarından biri olarak, 1500 yıllık geçmişiyle bize eşsiz bir miras bırakıyor. Bu muhteşem yapı, Bizans döneminden Osmanlı'ya, oradan da günümüze uzanan bir köprü görevi görüyor.</p>
-      
-      <h2>Mimari Özellikler</h2>
-      <p>Ayasofya'nın en dikkat çekici özelliklerinden biri, devasa kubbesi ve iç mekanındaki ışık oyunlarıdır. 55.6 metre yüksekliğindeki kubbe, döneminin en büyük kubbesi olarak bilinir. Yapının iç mekanı, gün ışığının farklı açılardan girmesiyle oluşan etkileyici bir atmosfere sahiptir.</p>
-      
-      <h2>Tarihi Detaylar</h2>
-      <p>Yapı, 532-537 yılları arasında Bizans İmparatoru I. Justinianos tarafından inşa ettirilmiştir. İnşaatında 10.000 işçi çalışmış ve yapımı sadece 5 yıl sürmüştür. Bu hızlı inşaat süreci, dönemin teknolojik imkanları düşünüldüğünde oldukça etkileyicidir.</p>
-      
-      <h2>Görülmesi Gereken Detaylar</h2>
-      <ul>
-        <li>İmparator Kapısı</li>
-        <li>Deesis Mozaiği</li>
-        <li>Mihrap ve Minber</li>
-        <li>Üst Galeri</li>
-        <li>Terleyen Sütun</li>
-      </ul>
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-      <h2>Ziyaret Bilgileri</h2>
-      <p>Ayasofya'yı ziyaret etmek için en uygun zaman, sabah erken saatlerdir. Özellikle yaz aylarında yoğun turist akını nedeniyle, sabah 09:00'dan önce gitmenizi öneririz. Giriş ücreti olmamakla birlikte, içeride rehberlik hizmeti alabilirsiniz.</p>
-    `,
-    image: '/images/ayasofya.jpg',
-    date: '23 Mart 2024',
-    readTime: '5 dk',
-    category: 'Tarih',
-    author: {
-      name: 'Mehmet Yılmaz',
-      avatar: '/images/ayasofya.jpg',
-      bio: 'İstanbul Tarihi Araştırmacısı ve Rehber'
+export default function BlogDetailPage({ params }) {
+  const { id } = use(params);
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!id) return;
+    axios.get(`${API_URL}/posts/${id}`)
+      .then(res => {
+        setPost(res.data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError('Yazı bulunamadı.');
+        setLoading(false);
+      });
+  }, [id]);
+
+  const renderBlock = (block) => {
+    switch (block.type) {
+      case 'paragraph':
+        return <p className="mb-4">{block.content}</p>;
+      case 'h1':
+        return <h1 className="text-3xl font-bold mb-4">{block.content}</h1>;
+      case 'h2':
+        return <h2 className="text-2xl font-bold mb-4">{block.content}</h2>;
+      case 'image':
+        return (
+          <div className="relative w-full h-96 mb-6 rounded-lg overflow-hidden">
+            <Image
+              src={block.content}
+              alt={block.alt || 'Blog görseli'}
+              fill
+              className="object-cover"
+            />
+          </div>
+        );
+      case 'list':
+        return (
+          <ul className="list-disc pl-6 mb-4">
+            {block.items.map((item, index) => (
+              <li key={index} className="mb-2">{item}</li>
+            ))}
+          </ul>
+        );
+      default:
+        return null;
     }
   };
 
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-gray-500">Yükleniyor...</div>;
+  }
+  if (error) {
+    return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
+  }
+  if (!post) return null;
+
   return (
     <main className="min-h-screen bg-gray-50 py-12">
-      <article className="container mx-auto px-4">
-        {/* Hero Section */}
-        <div className="relative mb-12 h-[60vh] w-full overflow-hidden rounded-2xl">
-          <Image
-            src={post.image}
-            alt={post.title}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-black/50" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center text-white">
-              <span className="mb-4 inline-block rounded-full bg-blue-600 px-4 py-2">
-                {post.category}
-              </span>
-              <h1 className="mb-4 text-4xl font-bold md:text-5xl">
-                {post.title}
-              </h1>
-              <div className="flex items-center justify-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Image
-                    src={post.author.avatar}
-                    alt={post.author.name}
-                    width={40}
-                    height={40}
-                    className="rounded-full"
-                  />
-                  <span>{post.author.name}</span>
-                </div>
-                <span>•</span>
-                <span>{post.date}</span>
-                <span>•</span>
-                <span>{post.readTime} okuma</span>
-              </div>
-            </div>
-          </div>
+      <div className="container mx-auto px-4 max-w-3xl">
+        <div className="mb-8">
+          <Link href="/blog" className="text-secondary hover:underline">← Tüm Bloglar</Link>
         </div>
-
-        {/* Content */}
-        <div className="mx-auto max-w-3xl">
-          <div
-            className="prose prose-lg max-w-none"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
-
-          {/* Author Bio */}
-          <div className="mt-12 rounded-lg bg-white p-6 shadow-lg">
-            <div className="flex items-center gap-4">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2">{post.title}</h1>
+          <div className="flex flex-wrap items-center gap-4 text-gray-500 text-sm mb-4">
+            <span>{new Date(post.created_at).toLocaleDateString('tr-TR')}</span>
+            <span>•</span>
+            <span>{post.author?.first_name} {post.author?.last_name}</span>
+            <span>•</span>
+            <span className="rounded-full bg-secondary px-3 py-1 text-xs text-white">{post.category?.name}</span>
+          </div>
+          {post.cover_image && (
+            <div className="relative w-full h-72 rounded-2xl overflow-hidden mb-8 shadow">
               <Image
-                src={post.author.avatar}
-                alt={post.author.name}
-                width={80}
-                height={80}
-                className="rounded-full"
+                src={post.cover_image}
+                alt={post.title}
+                fill
+                className="object-cover"
               />
-              <div>
-                <h3 className="text-xl font-bold">{post.author.name}</h3>
-                <p className="text-gray-600">{post.author.bio}</p>
-              </div>
             </div>
-          </div>
-
-          {/* Share Buttons */}
-          <div className="mt-8 flex items-center gap-4">
-            <span className="font-semibold">Paylaş:</span>
-            <button className="rounded-full bg-blue-600 p-2 text-white hover:bg-blue-700">
-              Facebook
-            </button>
-            <button className="rounded-full bg-blue-400 p-2 text-white hover:bg-blue-500">
-              Twitter
-            </button>
-            <button className="rounded-full bg-green-600 p-2 text-white hover:bg-green-700">
-              WhatsApp
-            </button>
-          </div>
-
-          {/* Related Posts */}
-          <div className="mt-12">
-            <h3 className="mb-6 text-2xl font-bold">İlgili Yazılar</h3>
-            <div className="grid gap-6 md:grid-cols-2">
-              <Link href="/blog/2" className="group">
-                <div className="rounded-lg bg-white p-4 shadow-md transition hover:shadow-lg">
-                  <h4 className="mb-2 text-lg font-semibold group-hover:text-blue-600">
-                    Topkapı Sarayı&apos;nda Bir Gün
-                  </h4>
-                  <p className="text-gray-600">Osmanlı&apos;nın kalbinde unutulmaz bir gezi deneyimi</p>
-                </div>
-              </Link>
-              <Link href="/blog/4" className="group">
-                <div className="rounded-lg bg-white p-4 shadow-md transition hover:shadow-lg">
-                  <h4 className="mb-2 text-lg font-semibold group-hover:text-blue-600">
-                    Sultanahmet Camii&apos;nin İhtişamı
-                  </h4>
-                  <p className="text-gray-600">Mavi Camii&apos;nin mimari detayları ve tarihi</p>
-                </div>
-              </Link>
-            </div>
-          </div>
+          )}
         </div>
-      </article>
+        <article className="prose prose-lg max-w-none text-gray-800 bg-white rounded-2xl shadow p-8">
+          {post.blocks && post.blocks.length > 0 ? (
+            post.blocks.map((block, index) => (
+              <div key={index}>
+                {renderBlock(block)}
+              </div>
+            ))
+          ) : (
+            <p>{post.content}</p>
+          )}
+        </article>
+      </div>
     </main>
   );
 } 

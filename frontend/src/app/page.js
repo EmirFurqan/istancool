@@ -1,8 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import Map from '@/components/Map';
-import Header from '@/components/Header/Header';
-import Footer from '@/components/Footer/Footer';
+import Map from '../components/Map';
+import Header from '../components/Header/Header';
+import Footer from '../components/Footer/Footer';
+
 export default function Home() {
   const istanbulLocations = [
     {
@@ -82,12 +83,11 @@ export default function Home() {
       <Header />
         
       {/* Hero Section with Map */}
-      <section className="relative h-[90vh] w-full">
+      <section className="relative h-[60vh] w-full">
         <div className="absolute inset-0">
           <Map locations={istanbulLocations} />
           <div className="absolute inset-0 bg-black/30" />
-        </div>
-        
+        </div> 
       </section>
 
       {/* Featured Posts Section */}

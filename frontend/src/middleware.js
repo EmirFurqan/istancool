@@ -10,6 +10,16 @@ export function middleware(req) {
     return NextResponse.rewrite(url);
   }
 
+  // Korumalı sayfalar için token kontrolü
+  const protectedPaths = ['/profile'];
+  if (protectedPaths.some((path) => url.pathname.startsWith(path))) {
+    const token = req.cookies.get('token')?.value;
+    if (!token) {
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
+  }
+
   // Diğerleri domain.com olarak devam eder
   return NextResponse.next();
 }

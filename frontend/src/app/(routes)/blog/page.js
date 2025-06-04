@@ -1,63 +1,27 @@
+'use client';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function BlogPage() {
-  const posts = [
-    {
-      id: 1,
-      title: 'Ayasofya&apos;nın Gizli Tarihi',
-      excerpt: '1500 yıllık tarihi ile Ayasofya&apos;nın bilinmeyen hikayeleri ve mimari detayları',
-      image: '/images/ayasofya.jpg',
-      date: '23 Mart 2024',
-      readTime: '5 dk',
-      category: 'Tarih'
-    },
-    {
-      id: 2,
-      title: 'Topkapı Sarayı&apos;nda Bir Gün',
-      excerpt: 'Osmanlı&apos;nın kalbinde unutulmaz bir gezi deneyimi ve sarayın gizli köşeleri',
-      image: '/images/topkapi.jpg',
-      date: '20 Mart 2024',
-      readTime: '7 dk',
-      category: 'Tarih'
-    },
-    {
-      id: 3,
-      title: 'Galata Kulesi&apos;nden İstanbul Manzarası',
-      excerpt: 'İstanbul&apos;un en güzel manzarasını sunan tarihi kulenin hikayesi ve ziyaret rehberi',
-      image: '/images/galata.jpg',
-      date: '18 Mart 2024',
-      readTime: '6 dk',
-      category: 'Gezi'
-    },
-    {
-      id: 4,
-      title: 'Sultanahmet Camii&apos;nin İhtişamı',
-      excerpt: 'Mavi Camii olarak bilinen Sultanahmet Camii&apos;nin mimari detayları ve tarihi',
-      image: '/images/sultanahmet.jpg',
-      date: '15 Mart 2024',
-      readTime: '8 dk',
-      category: 'Tarih'
-    },
-    {
-      id: 5,
-      title: 'Kapalıçarşı&apos;da Alışveriş Rehberi',
-      excerpt: 'Dünyanın en büyük kapalı çarşılarından birinde alışveriş yapmanın püf noktaları',
-      image: '/images/kapalicarsi.jpg',
-      date: '12 Mart 2024',
-      readTime: '4 dk',
-      category: 'Gezi'
-    },
-    {
-      id: 6,
-      title: 'İstanbul&apos;un En İyi Kahvaltı Mekanları',
-      excerpt: 'Geleneksel Türk kahvaltısının en iyi sunulduğu mekanlar ve öneriler',
-      image: '/images/ayasofya.jpg',
-      date: '10 Mart 2024',
-      readTime: '5 dk',
-      category: 'Yemek'
-    }
-  ];
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    axios.get(`${API_URL}/posts`)
+      .then(res => {
+        setPosts(res.data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError('Blog yazıları yüklenemedi.');
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <main className="min-h-screen bg-gray-50 py-12">
@@ -69,84 +33,71 @@ export default function BlogPage() {
             İstanbul&apos;un en güzel yerlerini ve hikayelerini keşfedin
           </p>
         </div>
-        
-        {/* Filters */}
+        {/* Filters (dummy, ileride dinamik yapılabilir) */}
         <div className="mb-8 flex flex-wrap gap-4">
-          <button className="rounded-full bg-blue-600 px-6 py-2 text-white">
-            Tümü
-          </button>
-          <button className="rounded-full bg-white px-6 py-2 shadow-md hover:bg-gray-50">
-            Tarih
-          </button>
-          <button className="rounded-full bg-white px-6 py-2 shadow-md hover:bg-gray-50">
-            Gezi
-          </button>
-          <button className="rounded-full bg-white px-6 py-2 shadow-md hover:bg-gray-50">
-            Kültür
-          </button>
-          <button className="rounded-full bg-white px-6 py-2 shadow-md hover:bg-gray-50">
-            Yemek
-          </button>
+          <button className="rounded-full bg-secondary px-6 py-2 text-white">Tümü</button>
+          <button className="rounded-full bg-white px-6 py-2 shadow-md hover:bg-gray-50">Tarih</button>
+          <button className="rounded-full bg-white px-6 py-2 shadow-md hover:bg-gray-50">Gezi</button>
+          <button className="rounded-full bg-white px-6 py-2 shadow-md hover:bg-gray-50">Kültür</button>
+          <button className="rounded-full bg-white px-6 py-2 shadow-md hover:bg-gray-50">Yemek</button>
         </div>
-
         {/* Posts Grid */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => (
-            <article key={post.id} className="group overflow-hidden rounded-lg bg-white shadow-lg">
-              <div className="relative h-64">
-                <Image
-                  src={post.image}
-                  alt={post.title}
-                  fill
-                  className="object-cover transition group-hover:scale-105"
-                />
-                <div className="absolute top-4 left-4">
-                  <span className="rounded-full bg-blue-600 px-3 py-1 text-sm text-white">
-                    {post.category}
-                  </span>
+        {loading ? (
+          <div className="text-center text-gray-500 py-20">Yükleniyor...</div>
+        ) : error ? (
+          <div className="text-center text-red-500 py-20">{error}</div>
+        ) : (
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {posts.map((post) => (
+              <article key={post.id} className="group overflow-hidden rounded-2xl bg-white shadow-lg border border-gray-100 hover:shadow-2xl transition">
+                <div className="relative h-64">
+                  <Image
+                    src={post.cover_image || '/images/ayasofya.jpg'}
+                    alt={post.title}
+                    fill
+                    className="object-cover transition group-hover:scale-105"
+                  />
+                  <div className="absolute top-4 left-4">
+                    <span className="rounded-full bg-secondary px-3 py-1 text-sm text-white shadow">
+                      {post.category?.name}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="p-6">
-                <div className="mb-4 flex items-center gap-4 text-sm text-gray-600">
-                  <span>{post.date}</span>
-                  <span>•</span>
-                  <span>{post.readTime} okuma</span>
-                </div>
-                <h2 className="mb-3 text-xl font-bold">
-                  <Link href={`/blog/${post.id}`} className="hover:text-blue-600">
+                <div className="p-6">
+                  <div className="mb-4 flex items-center gap-4 text-sm text-gray-500">
+                    <span>{new Date(post.created_at).toLocaleDateString('tr-TR')}</span>
+                    <span>•</span>
+                    <span>{post.author?.first_name} {post.author?.last_name}</span>
+                  </div>
+                  <h2 className="text-xl font-semibold mb-2">
                     {post.title}
+                  </h2>
+                  <p className="mb-4 text-gray-600">
+                    {post.content ? (
+                      post.content.length > 150 ? post.content.slice(0, 150) + '...' : post.content
+                    ) : (
+                      post.blocks?.find(block => block.type === 'paragraph')?.content?.slice(0, 150) + '...' || 'İçerik bulunamadı'
+                    )}
+                  </p>
+                  <Link
+                    href={`/blog/${post.id}`}
+                    className="inline-block bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary/90 transition"
+                  >
+                    Devamını Oku
                   </Link>
-                </h2>
-                <p className="mb-4 text-gray-600">{post.excerpt}</p>
-                <Link
-                  href={`/blog/${post.id}`}
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  Devamını Oku →
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        {/* Pagination */}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+        {/* Pagination (dummy) */}
         <div className="mt-12 flex justify-center">
           <nav className="flex items-center gap-2">
-            <button className="rounded-lg border px-4 py-2 hover:bg-gray-50">
-              Önceki
-            </button>
-            <button className="rounded-lg bg-blue-600 px-4 py-2 text-white">
-              1
-            </button>
-            <button className="rounded-lg border px-4 py-2 hover:bg-gray-50">
-              2
-            </button>
-            <button className="rounded-lg border px-4 py-2 hover:bg-gray-50">
-              3
-            </button>
-            <button className="rounded-lg border px-4 py-2 hover:bg-gray-50">
-              Sonraki
-            </button>
+            <button className="rounded-lg border px-4 py-2 hover:bg-gray-50">Önceki</button>
+            <button className="rounded-lg bg-secondary px-4 py-2 text-white">1</button>
+            <button className="rounded-lg border px-4 py-2 hover:bg-gray-50">2</button>
+            <button className="rounded-lg border px-4 py-2 hover:bg-gray-50">3</button>
+            <button className="rounded-lg border px-4 py-2 hover:bg-gray-50">Sonraki</button>
           </nav>
         </div>
       </div>
