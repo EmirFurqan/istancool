@@ -4,6 +4,7 @@ from typing import Optional, List, Dict, Any
 from .category import Category
 from .user import User
 from models.post import PostStatus
+from .district import District
 
 class PostBase(BaseModel):
     title: str
@@ -11,7 +12,10 @@ class PostBase(BaseModel):
     content: Optional[str] = None
     cover_image: Optional[str] = None
     category_id: int
-    blocks: Optional[List[Dict[str, Any]]] = None
+    district_id: Optional[int] = None
+    latitude: Optional[str] = None
+    longitude: Optional[str] = None
+    blocks: List[Dict[str, Any]]
 
 class PostCreate(PostBase):
     pass
@@ -22,6 +26,9 @@ class PostUpdate(BaseModel):
     content: Optional[str] = None
     cover_image: Optional[str] = None
     category_id: Optional[int] = None
+    district_id: Optional[int] = None
+    latitude: Optional[str] = None
+    longitude: Optional[str] = None
     status: Optional[PostStatus] = None
     is_active: Optional[bool] = None
     blocks: Optional[List[Dict[str, Any]]] = None
@@ -37,7 +44,22 @@ class Post(PostBase):
     # İlişkiler
     category: Category
     author: User
+    district: Optional[District] = None
     blocks: Optional[List[Dict[str, Any]]] = None
 
     class Config:
-        from_attributes = True 
+        from_attributes = True
+
+class CategoryShort(BaseModel):
+    name: str
+
+class FeaturedPostSchema(BaseModel):
+    id: int
+    title: str
+    cover_image: Optional[str]
+    category: Optional[CategoryShort]
+    summary: Optional[str]
+    slug: Optional[str] = None
+
+    class Config:
+        orm_mode = True 

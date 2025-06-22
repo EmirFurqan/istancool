@@ -72,7 +72,7 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 required
-                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out"
+                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-lg text-white  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out"
                 placeholder="ornek@email.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -86,7 +86,7 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 required
-                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out"
+                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-lg text-white  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out"
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}

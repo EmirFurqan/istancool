@@ -1,8 +1,8 @@
 .st0 {
-  fill: #cded88;
+  fill: #002084;
 }
 
 .st0:hover {
-  fill: #FFFFFF;
+  fill: #cded88;
   transition: fill 0.3s ease;
 }

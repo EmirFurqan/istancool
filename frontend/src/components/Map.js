@@ -38,12 +38,9 @@ const MapComponent = ({ locations }) => {
           });
         };
 
-        // Marker renkleri
-        const markerColors = ['#FF5252', '#4CAF50', '#2196F3', '#FFC107', '#9C27B0'];
-        
         // Haritayı oluştur
         if (!mapInstanceRef.current) {
-          mapInstanceRef.current = L.map(mapRef.current).setView([41.0082, 28.9784], 13);
+          mapInstanceRef.current = L.map(mapRef.current).setView([41.085, 28.9784], 9.8);
           
           // OpenStreetMap tile layer ekle
           L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -53,18 +50,12 @@ const MapComponent = ({ locations }) => {
         }
 
         // Marker'ları ekle
-        locations.forEach((location, index) => {
-          const color = markerColors[index % markerColors.length];
+        locations.forEach((location) => {
           const marker = L.marker([location.lat, location.lng], {
-            icon: createCustomIcon(color)
+            icon: createCustomIcon(location.color)
           })
             .addTo(mapInstanceRef.current)
-            .bindPopup(`
-              <div class="p-2">
-                <h3 class="font-bold">${location.name}</h3>
-                <p class="text-sm text-gray-600">${location.description}</p>
-              </div>
-            `);
+            .bindPopup(location.popupContent);
         });
 
         // Haritayı yeniden boyutlandır
@@ -86,8 +77,7 @@ const MapComponent = ({ locations }) => {
       ref={mapRef} 
       className="h-full w-full"
       style={{ zIndex: 1 }}
-    >
-    </div>
+    />
   );
 };
 

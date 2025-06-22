@@ -10,10 +10,16 @@ export function middleware(req) {
     return NextResponse.rewrite(url);
   }
 
+  const token = req.cookies.get('token')?.value;
+
+  // Giriş yapmış kullanıcıların login ve register sayfalarına erişimini engelle
+  if (token && (url.pathname === '/login' || url.pathname === '/register')) {
+    return NextResponse.redirect(new URL('/', url));
+  }
+
   // Korumalı sayfalar için token kontrolü
-  const protectedPaths = ['/profile'];
+  const protectedPaths = ['/profile', '/admin'];
   if (protectedPaths.some((path) => url.pathname.startsWith(path))) {
-    const token = req.cookies.get('token')?.value;
     if (!token) {
       url.pathname = '/login';
       return NextResponse.redirect(url);

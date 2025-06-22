@@ -73,14 +73,16 @@ export default function BlogPage() {
                     {post.title}
                   </h2>
                   <p className="mb-4 text-gray-600">
-                    {post.content ? (
+                    {post.short_content ? (
+                      post.short_content.length > 150 ? post.short_content.slice(0, 150) + '...' : post.short_content
+                    ) : post.content ? (
                       post.content.length > 150 ? post.content.slice(0, 150) + '...' : post.content
                     ) : (
                       post.blocks?.find(block => block.type === 'paragraph')?.content?.slice(0, 150) + '...' || 'İçerik bulunamadı'
                     )}
                   </p>
                   <Link
-                    href={`/blog/${post.id}`}
+                    href={`/blog/${post.slug}`}
                     className="inline-block bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary/90 transition"
                   >
                     Devamını Oku

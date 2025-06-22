@@ -24,8 +24,7 @@ export default function RegisterPage() {
     length: false,
     uppercase: false,
     lowercase: false,
-    number: false,
-    special: false
+    number: false
   });
 
   const validatePassword = (password) => {
@@ -38,8 +37,7 @@ export default function RegisterPage() {
       length: password.length >= 8,
       uppercase: /[A-Z]/.test(password),
       lowercase: /[a-z]/.test(password),
-      number: /[0-9]/.test(password),
-      special: /[@$!%*?&]/.test(password)
+      number: /[0-9]/.test(password)
     });
   };
 
@@ -120,7 +118,7 @@ export default function RegisterPage() {
                   id="firstName"
                   type="text"
                   required
-                  className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out"
+                  className="appearance-none block w-full px-4 py-3 border border-gray-200 text-white rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out"
                   placeholder="Ad"
                   value={formData.firstName}
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
@@ -134,7 +132,7 @@ export default function RegisterPage() {
                   id="lastName"
                   type="text"
                   required
-                  className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out"
+                  className="appearance-none block w-full px-4 py-3 border border-gray-200 text-white rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out"
                   placeholder="Soyad"
                   value={formData.lastName}
                   onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
@@ -149,7 +147,7 @@ export default function RegisterPage() {
                 id="email"
                 type="email"
                 required
-                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out"
+                className="appearance-none block w-full px-4 py-3 border border-gray-200 text-white rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out"
                 placeholder="ornek@email.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -164,7 +162,7 @@ export default function RegisterPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   required
-                  className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out"
+                  className="appearance-none block w-full px-4 py-3 border border-gray-200 text-white rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out"
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => {
@@ -175,7 +173,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2  text-white hover:text-gray-700"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -205,12 +203,6 @@ export default function RegisterPage() {
                   </span>
                   <span className={passwordValidation.number ? 'text-green-500' : 'text-white/70'}>En az 1 sayı</span>
                 </div>
-                <div className="flex items-center text-xs">
-                  <span className={`mr-2 ${passwordValidation.special ? 'text-green-500' : 'text-white/70'}`}>
-                    {passwordValidation.special ? <Check size={14} /> : '•'}
-                  </span>
-                  <span className={passwordValidation.special ? 'text-green-500' : 'text-white/70'}>En az 1 özel karakter</span>
-                </div>
               </div>
             </div>
             <div>
@@ -222,7 +214,7 @@ export default function RegisterPage() {
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   required
-                  className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out"
+                  className="appearance-none block w-full px-4 py-3 border border-gray-200 text-white rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150 ease-in-out"
                   placeholder="••••••••"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
@@ -230,7 +222,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-700"
                 >
                   {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>

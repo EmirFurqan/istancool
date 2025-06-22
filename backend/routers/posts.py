@@ -5,9 +5,12 @@ from database import get_db
 from models.post import Post, PostStatus
 from models.user import User, UserRole
 from models.category import Category
-from schemas.post import PostCreate, PostUpdate, Post as PostSchema
+from models.district import District
+from schemas.post import PostCreate, PostUpdate, Post as PostSchema, FeaturedPostSchema
+from schemas.map import MapPost
 from dependencies import get_current_active_user, get_current_admin, get_current_editor_or_admin
 from services.cloudinary_service import upload_image
+from services.slug_service import create_slug
 import json
 
 router = APIRouter(
@@ -19,64 +22,82 @@ router = APIRouter(
 async def create_post(
     request: Request,
     title: str = Form(...),
-    slug: str = Form(...),
     content: Optional[str] = Form(None),
     category_id: int = Form(...),
+    district_id: Optional[int] = Form(None),
+    latitude: Optional[str] = Form(None),
+    longitude: Optional[str] = Form(None),
     cover_image: Optional[UploadFile] = File(None),
     blocks: str = Form(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    # Kategori kontrolü
     category = db.query(Category).filter(Category.id == category_id).first()
-    if not category:
-        raise HTTPException(status_code=404, detail="Kategori bulunamadı")
-    if not category.is_active:
-        raise HTTPException(status_code=400, detail="Kategori aktif değil")
+    if not category or not category.is_active:
+        raise HTTPException(status_code=404, detail="Kategori bulunamadı veya pasif")
 
-    # Slug kontrolü
-    existing_post = db.query(Post).filter(Post.slug == slug).first()
-    if existing_post:
-        raise HTTPException(status_code=400, detail="Bu slug zaten kullanılıyor")
+    # İlçe kontrolü
+    if district_id:
+        district = db.query(District).filter(District.id == district_id).first()
+        if not district:
+            raise HTTPException(status_code=404, detail="İlçe bulunamadı")
 
-    # Kapak resmini yükle
+    # Başlıktan otomatik slug oluştur
+    slug = create_slug(title, db)
+    
+    # Slug'ın benzersiz olduğundan emin ol
+    base_slug = slug
+    counter = 1
+    while db.query(Post).filter(Post.slug == slug).first():
+        slug = f"{base_slug}-{counter}"
+        counter += 1
+
     cover_image_url = None
     if cover_image:
         cover_image_url = await upload_image(cover_image)
 
-    # Blocks'u parse et
     try:
         blocks_data = json.loads(blocks)
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Geçersiz blocks formatı")
 
-    # Form verilerini al
     form_data = await request.form()
+    blocks_raw = form_data.get("blocks")
+    blocks = json.loads(blocks_raw)
 
-    # Blok resimlerini yükle
-    for i, block in enumerate(blocks_data):
-        if block.get('type') == 'image':
-            # FormData'dan resim dosyasını al
-            image_file = form_data.get(f'block_image_{i}')
-            if image_file and isinstance(image_file, UploadFile):
-                try:
-                    # Resmi Cloudinary'ye yükle
-                    image_url = await upload_image(image_file)
-                    # Blok verisini güncelle
-                    block['content'] = image_url
-                except Exception as e:
-                    print(f"Resim yükleme hatası (blok {i}): {str(e)}")
-                    raise HTTPException(status_code=500, detail=f"Resim yükleme hatası: {str(e)}")
+    # Blocks içindeki resimleri Cloudinary'ye yükle
+    for i, block in enumerate(blocks):
+        if block.get("type") == "image":
+            file_key = f"block_image_{i}"
+            if file_key in form_data:
+                file: UploadFile = form_data[file_key]
+                if file:
+                    url = await upload_image(file)
+                    block["src"] = url
+        elif block.get("type") == "grid":
+            # Grid içindeki blokları işle
+            for j, grid_block in enumerate(block.get("blocks", [])):
+                if grid_block.get("type") == "image":
+                    file_key = f"grid_{i}_block_image_{j}"
+                    if file_key in form_data:
+                        file: UploadFile = form_data[file_key]
+                        if file:
+                            url = await upload_image(file)
+                            grid_block["src"] = url
+                            if "content" in grid_block:
+                                del grid_block["content"]
 
-    # Yeni post oluştur
     db_post = Post(
         title=title,
         slug=slug,
         content=content,
         cover_image=cover_image_url,
         category_id=category_id,
+        district_id=district_id,
+        latitude=latitude,
+        longitude=longitude,
         author_id=current_user.id,
-        blocks=blocks_data,
+        blocks=blocks,
         status=PostStatus.APPROVED if current_user.role == "admin" else PostStatus.PENDING
     )
 
@@ -87,13 +108,14 @@ async def create_post(
         return db_post
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Post oluşturma hatası: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Post oluşturulamadı: {str(e)}")
+
 
 @router.get("/", response_model=List[PostSchema])
 async def get_posts(
-    skip: int = 0,
-    limit: int = 10,
-    category_id: int = None,
+    category_name: Optional[str] = None,
+    district_name: Optional[str] = None,
+    search: Optional[str] = None,
     status: PostStatus = None,
     db: Session = Depends(get_db)
 ):
@@ -102,11 +124,89 @@ async def get_posts(
     # Sadece onaylı yazıları göster
     query = query.filter(Post.status == PostStatus.APPROVED)
     
-    if category_id:
-        query = query.filter(Post.category_id == category_id)
+    # Kategori filtresi (isimle)
+    if category_name:
+        query = query.join(Post.category).filter(Category.name.ilike(f"%{category_name}%"))
     
-    posts = query.offset(skip).limit(limit).all()
+    # İlçe filtresi (isimle)
+    if district_name:
+        query = query.join(Post.district).filter(District.name.ilike(f"%{district_name}%"))
+    
+    # Arama filtresi
+    if search:
+        search = f"%{search}%"
+        query = query.filter(
+            (Post.title.ilike(search)) |
+            (Post.content.ilike(search))
+        )
+    
+    posts = query
     return posts
+
+@router.get("/featured", response_model=List[FeaturedPostSchema])
+async def get_featured_posts(
+    skip: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_db)
+):
+    posts = db.query(Post).filter(
+        Post.is_featured == True,
+        Post.status == PostStatus.APPROVED,
+        Post.is_active == True
+    ).offset(skip).limit(limit).all()
+
+    # Sadece gerekli alanları dön
+    result = []
+    for post in posts:
+        # Blocks içinden metin içeriğini çıkar
+        summary = ""
+        if post.blocks:
+            for block in post.blocks:
+                if block.get('type') == 'text' and block.get('content'):
+                    summary += block['content'] + " "
+                    if len(summary) > 100:
+                        summary = summary[:100] + "..."
+                        break
+
+        result.append({
+            "id": post.id,
+            "title": post.title,
+            "cover_image": post.cover_image,
+            "category": {"name": post.category.name} if post.category else None,
+            "summary": summary,
+            "slug": post.slug
+        })
+    return result
+
+@router.get("/map-posts", response_model=List[MapPost])
+def get_map_posts(db: Session = Depends(get_db)):
+    """
+    Haritada gösterilecek postları getirir.
+    Sadece aktif ve konum bilgisi olan postları döndürür.
+    """
+    posts = db.query(Post).join(Post.category).filter(
+        Post.is_active == True,
+        Post.latitude.isnot(None),
+        Post.longitude.isnot(None)
+    ).all()
+    
+    # Her post için kategori adını ekle
+    result = []
+    for post in posts:
+        post_dict = {
+            "id": post.id,
+            "title": post.title,
+            "content": post.content,
+            "cover_image": post.cover_image,
+            "latitude": post.latitude,
+            "longitude": post.longitude,
+            "category_id": post.category_id,
+            "category_name": post.category.name if post.category else None,
+            "category_color": post.category.color if post.category else None
+        }
+        result.append(post_dict)
+    
+    return result
 
 @router.get("/{post_id}", response_model=PostSchema)
 async def get_post(
@@ -245,4 +345,26 @@ async def reject_post(
     db_post.status = PostStatus.REJECTED
     db.commit()
     db.refresh(db_post)
-    return {"message": "Post rejected successfully"} 
+    return {"message": "Post rejected successfully"}
+
+@router.patch("/{post_id}/toggle-featured")
+async def toggle_featured_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_editor_or_admin)
+):
+    db_post = db.query(Post).filter(Post.id == post_id).first()
+    if not db_post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    db_post.is_featured = not db_post.is_featured
+    db.commit()
+    db.refresh(db_post)
+    return {"message": f"Post featured status changed to {'featured' if db_post.is_featured else 'not featured'}"}
+
+@router.get("/slug/{slug}", response_model=PostSchema)
+def get_post_by_slug(slug: str, db: Session = Depends(get_db)):
+    post = db.query(Post).filter(Post.slug == slug).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post bulunamadı")
+    return post

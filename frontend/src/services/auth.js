@@ -43,6 +43,23 @@ export const authService = {
     }
   },
 
+  async getCurrentUser() {
+    try {
+      const token = Cookies.get('token');
+      if (!token) return null;
+
+      const response = await axios.get(`${API_URL}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Kullanıcı bilgileri alınamadı:', error);
+      return null;
+    }
+  },
+
   logout() {
     Cookies.remove('token');
   },

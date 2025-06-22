@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <Image src="/logogreen.png" alt="İstanbul Cool Logo" width={150} height={150} className="hover:opacity-90 transition-opacity" />
+            <Image src="/logogreen.png" alt="İstanbul Cool Logo" width={150} height={150} className="hover:opacity-90 transition-opacity h-auto w-auto" />
             <p className="text-gray-300 leading-relaxed">
               İstanbul'un en güzel yerlerini keşfedin ve deneyimlerinizi paylaşın.
             </p>
@@ -18,19 +18,28 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4 text-white">Hızlı Bağlantılar</h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/" className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center">
+                <Link
+                  href="/"
+                  className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center"
+                  legacyBehavior>
                   <span className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></span>
                   Ana Sayfa
                 </Link>
               </li>
               <li>
-                <Link href="/places" className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center">
+                <Link
+                  href="/places"
+                  className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center"
+                  legacyBehavior>
                   <span className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></span>
                   Mekanlar
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center">
+                <Link
+                  href="/about"
+                  className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center"
+                  legacyBehavior>
                   <span className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></span>
                   Hakkımızda
                 </Link>

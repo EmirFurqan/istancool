@@ -22,7 +22,16 @@ async def upload_image(file: UploadFile, folder: str = "blog_images") -> str:
         result = cloudinary.uploader.upload(
             file_content,
             folder=folder,
-            resource_type="auto"
+            resource_type="auto",
+            transformation=[
+                {
+                    "width": 1200,  # Maksimum genişlik
+                    "height": 800,  # Maksimum yükseklik
+                    "crop": "limit",  # Oranı koru ve limitleri aşma
+                    "quality": "auto",  # Otomatik kalite optimizasyonu
+                    "fetch_format": "auto"  # Otomatik format optimizasyonu
+                }
+            ]
         )
         
         # Güvenli URL'i döndür

@@ -14,16 +14,22 @@ class Post(Base):
     __tablename__ = "posts"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
-    slug = Column(String, unique=True, nullable=False)
-    content = Column(Text)
-    cover_image = Column(String)
+    title = Column(String, index=True)
+    slug = Column(String, unique=True, index=True)
+    content = Column(String, nullable=True)
+    cover_image = Column(String, nullable=True)
     status = Column(Enum(PostStatus), default=PostStatus.PENDING)
     is_active = Column(Boolean, default=True)
+    is_featured = Column(Boolean, default=False)
+    latitude = Column(String, nullable=True)
+    longitude = Column(String, nullable=True)
     
     # İlişkiler
     category_id = Column(Integer, ForeignKey("categories.id"))
     category = relationship("Category", back_populates="posts")
+    
+    district_id = Column(Integer, ForeignKey("districts.id"), nullable=True)
+    district = relationship("District")
     
     author_id = Column(Integer, ForeignKey("users.id"))
     author = relationship("User", back_populates="posts")
