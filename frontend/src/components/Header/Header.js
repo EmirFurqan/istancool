@@ -89,9 +89,7 @@ function Header() {
 
   const navigationItems = [
     { label: 'Ana Sayfa', href: '/' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'Kategoriler', href: '/categories' },
-    { label: 'Harita', href: '/map' },
+    { label: 'Yazılar', href: '/blog' },
   ];
 
   return (

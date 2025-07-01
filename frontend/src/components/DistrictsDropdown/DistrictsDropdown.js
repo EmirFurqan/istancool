@@ -35,7 +35,7 @@ const DistrictsDropdown = ({ districts }) => {
       {/* Dropdown Butonu */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 text-gray-700 font-bold hover:text-secondary transition-colors duration-200 rounded-lg hover:bg-gray-50"
+        className="flex items-center gap-2 px-2 py-2 text-gray-700 font-bold hover:text-secondary transition-colors duration-200 rounded-lg hover:bg-gray-50"
       >
         İlçeler
         <ChevronDown
