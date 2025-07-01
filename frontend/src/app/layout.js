@@ -53,6 +53,11 @@ export const metadata = {
     google: 'google-site-verification-code',
     yandex: 'yandex-verification-code',
   },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({ children }) {

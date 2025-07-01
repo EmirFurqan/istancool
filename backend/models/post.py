@@ -21,6 +21,7 @@ class Post(Base):
     status = Column(Enum(PostStatus), default=PostStatus.PENDING)
     is_active = Column(Boolean, default=True)
     is_featured = Column(Boolean, default=False)
+    featured_order = Column(Integer, index=True, nullable=True)
     latitude = Column(String, nullable=True)
     longitude = Column(String, nullable=True)
     

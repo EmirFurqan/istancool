@@ -21,7 +21,7 @@ export default function Footer() {
                 <Link
                   href="/"
                   className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center"
-                  legacyBehavior>
+                  >
                   <span className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></span>
                   Ana Sayfa
                 </Link>
@@ -30,7 +30,7 @@ export default function Footer() {
                 <Link
                   href="/places"
                   className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center"
-                  legacyBehavior>
+                  >
                   <span className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></span>
                   Mekanlar
                 </Link>
@@ -39,7 +39,7 @@ export default function Footer() {
                 <Link
                   href="/about"
                   className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center"
-                  legacyBehavior>
+                  >
                   <span className="w-1.5 h-1.5 bg-primary rounded-full mr-2"></span>
                   Hakkımızda
                 </Link>

@@ -31,12 +31,16 @@ class PostUpdate(BaseModel):
     longitude: Optional[str] = None
     status: Optional[PostStatus] = None
     is_active: Optional[bool] = None
+    is_featured: Optional[bool] = None
+    featured_order: Optional[int] = None
     blocks: Optional[List[Dict[str, Any]]] = None
 
 class Post(PostBase):
     id: int
     status: PostStatus
     is_active: bool
+    is_featured: bool
+    featured_order: Optional[int] = None
     author_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
@@ -52,14 +56,15 @@ class Post(PostBase):
 
 class CategoryShort(BaseModel):
     name: str
+    color: Optional[str] = None
 
 class FeaturedPostSchema(BaseModel):
     id: int
     title: str
+    slug: str
     cover_image: Optional[str]
-    category: Optional[CategoryShort]
+    category: Category
     summary: Optional[str]
-    slug: Optional[str] = None
 
     class Config:
-        orm_mode = True 
+        from_attributes = True 

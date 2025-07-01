@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, Enum
+from sqlalchemy.orm import relationship
 from database import Base
 import enum
 
@@ -11,5 +12,8 @@ class District(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
+    slug = Column(String, unique=True, index=True, nullable=False)
     region = Column(Enum(DistrictRegion))
-    is_active = Column(Boolean, default=True) 
+    is_active = Column(Boolean, default=True)
+
+    posts = relationship("Post", back_populates="district") 

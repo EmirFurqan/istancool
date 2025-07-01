@@ -22,10 +22,10 @@ const MapComponent = ({ locations }) => {
             className: 'custom-marker',
             html: `<div style="
               background-color: ${color};
-              width: 24px;
-              height: 24px;
+              width: 12px;
+              height: 12px;
               border-radius: 50%;
-              border: 2px solid white;
+              border: 1px solid white;
               box-shadow: 0 2px 5px rgba(0,0,0,0.2);
               display: flex;
               align-items: center;

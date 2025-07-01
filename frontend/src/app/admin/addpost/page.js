@@ -7,6 +7,13 @@ import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
+import HeadingBlock from '@/components/blocks/HeadingBlock';
+import ParagraphBlock from '@/components/blocks/ParagraphBlock';
+import ParagraphBlockEdit from '@/components/blocks/ParagraphBlockEdit';
+import ImageBlock from '@/components/blocks/ImageBlock';
+import NumberedListBlock from '@/components/blocks/NumberedListBlock';
+import GridBlock from '@/components/blocks/GridBlock';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 const BLOCK_TYPES = [
@@ -333,75 +340,49 @@ export default function AddPostPage() {
   const renderBlock = (block, idx) => {
     switch (block.type) {
       case 'h1':
-        return <h1 key={idx} className="text-4xl font-bold mb-6">{block.content}</h1>;
+        return <HeadingBlock key={idx} level={1} content={block.content} />;
       case 'h2':
-        return <h2 key={idx} className="text-3xl font-semibold mb-4">{block.content}</h2>;
+        return <HeadingBlock key={idx} level={2} content={block.content} />;
       case 'paragraph':
-        return <p key={idx} className="text-lg leading-relaxed mb-6">{block.content}</p>;
+        return <ParagraphBlock key={idx} content={block.content} />;
       case 'image':
         return block.content && block.content.startsWith('blob:') ? (
-          <div key={idx} className="relative aspect-video rounded-lg overflow-hidden my-6">
-            <Image
-              src={block.content}
-              alt="Blog görseli"
-              fill
-              className="object-cover"
-            />
-          </div>
+          <ImageBlock
+            key={idx}
+            src={block.content}
+            alt="Blog görseli"
+          />
         ) : null;
       case 'list':
+        return <NumberedListBlock key={idx} items={block.items} />;
+      case 'grid': {
+        const adaptedBlocks = block.blocks.map(b => {
+          const newBlock = { ...b };
+          if (b.type === 'h1') {
+            newBlock.type = 'heading';
+            newBlock.level = 1;
+          } else if (b.type === 'h2') {
+            newBlock.type = 'heading';
+            newBlock.level = 2;
+          } else if (b.type === 'list') {
+            newBlock.type = 'numbered_list';
+          } else if (b.type === 'image') {
+            newBlock.src = b.content; // Map content to src for ImageBlock within GridBlock
+          }
+          return newBlock;
+        });
         return (
-          <ul key={idx} className="list-disc pl-6 text-lg mb-6">
-            {block.items.map((item, i) => (
-              <li key={i} className="mb-2">{item}</li>
-            ))}
-          </ul>
+            <GridBlock key={idx} columns={block.columns} blocks={adaptedBlocks} />
         );
-      case 'grid':
-        return (
-          <div key={idx} className="space-y-4">
-            <div className={`grid grid-cols-1 md:grid-cols-${block.columns} gap-6`}>
-              {Array.from({ length: block.columns }).map((_, colIdx) => (
-                <div key={`grid-${idx}-col-${colIdx}`} className="space-y-4">
-                  {block.blocks
-                    .filter((b) => b.column === colIdx)
-                    .map((gridBlock) => (
-                      <div key={`grid-${idx}-block-${gridBlock.id}`} className="mb-4 last:mb-0">
-                        {gridBlock.type === 'paragraph' && (
-                          <p className="text-lg leading-relaxed">{gridBlock.content}</p>
-                        )}
-                        {gridBlock.type === 'image' && gridBlock.content && gridBlock.content.startsWith('blob:') && (
-                          <div className="relative aspect-video rounded-lg overflow-hidden">
-                            <Image
-                              src={gridBlock.content}
-                              alt="Grid görseli"
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        )}
-                        {gridBlock.type === 'list' && (
-                          <ul className="list-disc pl-6 text-lg">
-                            {gridBlock.items.map((item, itemIdx) => (
-                              <li key={`grid-${idx}-block-${gridBlock.id}-item-${itemIdx}`} className="mb-2">{item}</li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        );
+      }
       default:
         return null;
     }
   };
 
   return (
-    <main className="min-h-screen">
-      <div className="flex h-screen">
+    <main className="">
+      <div className="flex h-full">
         {/* Sol Taraf - Geniş Önizleme */}
         <div className="flex-1 overflow-y-auto p-8">
           <div className="max-w-6xl mx-auto">
@@ -432,14 +413,14 @@ export default function AddPostPage() {
                 </div>
               )}
             </div>
-            <article className="prose prose-lg max-w-none text-gray-800">
+            <article className="max-w-none text-gray-800">
               {blocks.map((block, idx) => renderBlock(block, idx))}
             </article>
           </div>
         </div>
 
         {/* Sağ Taraf - Sidebar */}
-        <div className="w-[480px] bg-white border-l border-gray-200 overflow-y-auto">
+        <div className="w-[360px] md:w-[400px] bg-white border-l border-gray-200 overflow-y-auto">
           <div className="p-6 space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">İçerik Düzenle</h2>
@@ -547,13 +528,13 @@ export default function AddPostPage() {
               <div className="bg-gray-50 rounded-lg p-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-medium text-gray-900">İçerik Blokları</h3>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2 overflow-x-auto max-w-[220px] md:max-w-[260px]">
                     {BLOCK_TYPES.map((b) => (
                       <button 
                         key={b.type} 
                         type="button" 
                         onClick={() => addBlock(b.type)} 
-                        className="bg-white hover:bg-gray-100 px-3 py-1 rounded-lg text-sm border border-gray-200 transition-colors"
+                        className="bg-white hover:bg-gray-100 px-2 py-1 rounded-lg text-xs border border-gray-200 transition-colors min-w-fit"
                       >
                         {b.label}
                       </button>
@@ -643,12 +624,9 @@ export default function AddPostPage() {
                                     />
                                   )}
                                   {block.type === 'paragraph' && (
-                                    <textarea 
-                                      value={block.content} 
-                                      onChange={(e) => updateBlock(idx, { content: e.target.value })} 
-                                      placeholder="Paragraf metni" 
-                                      className="w-full text-sm border border-gray-200 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" 
-                                      rows="3" 
+                                    <ParagraphBlockEdit
+                                      value={block.content}
+                                      onChange={(value) => updateBlock(idx, { content: value })}
                                     />
                                   )}
                                   {block.type === 'image' && (
@@ -719,6 +697,24 @@ export default function AddPostPage() {
                                               .filter((b) => b.column === colIdx)
                                               .map((gridBlock) => (
                                                 <div key={`grid-${idx}-block-${gridBlock.id}`} className="mb-4 last:mb-0">
+                                                  {gridBlock.type === 'h1' && (
+                                                    <input
+                                                      type="text"
+                                                      value={gridBlock.content}
+                                                      onChange={(e) => updateBlockInGrid(idx, gridBlock.id, { content: e.target.value })}
+                                                      placeholder="Başlık (H1)"
+                                                      className="w-full text-sm font-bold border border-gray-200 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                                    />
+                                                  )}
+                                                  {gridBlock.type === 'h2' && (
+                                                    <input
+                                                      type="text"
+                                                      value={gridBlock.content}
+                                                      onChange={(e) => updateBlockInGrid(idx, gridBlock.id, { content: e.target.value })}
+                                                      placeholder="Alt Başlık (H2)"
+                                                      className="w-full text-sm font-semibold border border-gray-200 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                                    />
+                                                  )}
                                                   {gridBlock.type === 'paragraph' && (
                                                     <textarea
                                                       value={gridBlock.content}

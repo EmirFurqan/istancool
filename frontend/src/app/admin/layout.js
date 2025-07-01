@@ -3,64 +3,69 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '../../services/auth';
-import Sidebar, {SidebarItem} from '@/components/Admin/Sidebar';
-import { LayoutDashboard,LayoutGrid,PlusCircle,Newspaper } from 'lucide-react';
+import Sidebar, { SidebarItem, SidebarSection } from '@/components/Admin/Sidebar';
+import {
+  LayoutDashboard,
+  Newspaper,
+  Folders,
+  Settings,
+  User,
+  Star,
+  PlusCircle,
+} from "lucide-react";
+import Header from "@/components/Admin/Header/Header";
 
 export default function AdminLayout({ children }) {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
-    const checkAdminAccess = async () => {
+    const fetchUser = async () => {
       try {
-        const userData = await authService.getCurrentUser();
-        
-        if (!userData || userData.role !== 'admin') {
-          router.push('/');
-          return;
+        const currentUser = await authService.getCurrentUser();
+        if (!currentUser) {
+          router.push('/login');
+        } else {
+          setUser(currentUser);
         }
-
-        setUser(userData);
       } catch (error) {
-        console.error('Admin erişim hatası:', error);
-        router.push('/');
-      } finally {
-        setLoading(false);
+        console.error('Failed to fetch user', error);
+        router.push('/login');
       }
     };
-
-    checkAdminAccess();
+    fetchUser();
   }, [router]);
 
-  if (loading) {
+  if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
+        <div className="flex h-screen items-center justify-center">
+            Yükleniyor...
+        </div>
     );
   }
 
-
-
   return (
-    <div className="flex h-screen bg-gray-50">
-      
-      <Sidebar>
-        <SidebarItem icon={<LayoutDashboard size={20} />} text="Dashboard" to="/admin" />
-        <SidebarItem icon={<Newspaper size={20} />} text="Yazılar" to="/admin/posts" />
-        <SidebarItem icon={<PlusCircle size={20} />} text="Yeni Yazı Ekle" to="/addpost" />
-        <SidebarItem icon={<LayoutGrid size={20} />} text="Kategoriler" to="/admin/categories" />
-      </Sidebar>
-     
-      <div className="flex flex-col overflow-scroll justify-between w-full h-screen bg-gray-50 z-0">
-          <div className="">
+    <div className="flex min-h-screen bg-gray-50">
+        <Sidebar>
+          <SidebarSection title="Genel">
+            <SidebarItem icon={<LayoutDashboard />} text="Panel" to="/admin" />
+          </SidebarSection>
+          <SidebarSection title="İçerik Yönetimi">
+            <SidebarItem icon={<Newspaper />} text="Yazılar" to="/admin/posts" />
+            <SidebarItem icon={<PlusCircle />} text="Yeni Yazı Ekle" to="/admin/addpost" />
+            <SidebarItem icon={<Folders />} text="Kategoriler" to="/admin/categories" />
+            <SidebarItem icon={<Star />} text="Öne Çıkanlar" to="/admin/featured" />
+          </SidebarSection>
+          <SidebarSection title="Yönetim">
+            <SidebarItem icon={<User />} text="Kullanıcılar" to="/admin/users" />
+            <SidebarItem icon={<Settings />} text="Ayarlar" to="/admin/settings" />
+          </SidebarSection>
+        </Sidebar>
 
-            <div className="px-8 pb-4">
-              {children}
-            </div>
-          </div>
-      </div>
+        <div className="flex-1 overflow-y-auto">
+            <Header />
+            <main className="p-6">{children}</main>
+        </div>
     </div>
-  )
+  );
 }

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -15,7 +16,7 @@ const handleResponse = async (response) => {
 };
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
+  const token = Cookies.get('token');
   if (!token) {
     // Bu durumda ideal olarak kullanıcı login sayfasına yönlendirilir.
     // Şimdilik sadece hata fırlatıyoruz.
@@ -26,6 +27,7 @@ const getAuthHeaders = () => {
     'Authorization': `Bearer ${token}`,
   };
 };
+
 
 export const postService = {
   // Öne çıkan yazıları getir
@@ -75,6 +77,36 @@ export const postService = {
       headers: getAuthHeaders(),
     });
     // Silme işlemi genelde 204 No Content döner, handleResponse bunu yönetir.
+    return handleResponse(response);
+  },
+
+  // Yazıların toplam sayısını getir
+  async getPostsCount() {
+    try {
+      const response = await fetch(`${API_URL}/posts/admin/count`, {
+        headers: getAuthHeaders(),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('Error fetching posts count:', error);
+      throw error;
+    }
+  },
+
+  async updateFeaturedOrder(postIds) {
+    const response = await fetch(`${API_URL}/posts/featured/order`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ post_ids: postIds }),
+    });
+    return handleResponse(response);
+  },
+
+  async toggleFeaturedStatus(postId) {
+    const response = await fetch(`${API_URL}/posts/${postId}/toggle-featured`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+    });
     return handleResponse(response);
   }
 }; 

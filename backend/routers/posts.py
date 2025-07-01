@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form, Request
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from database import get_db
 from models.post import Post, PostStatus
@@ -12,6 +12,7 @@ from dependencies import get_current_active_user, get_current_admin, get_current
 from services.cloudinary_service import upload_image
 from services.slug_service import create_slug
 import json
+from pydantic import BaseModel
 
 router = APIRouter(
     prefix="/posts",
@@ -113,33 +114,25 @@ async def create_post(
 
 @router.get("/", response_model=List[PostSchema])
 async def get_posts(
-    category_name: Optional[str] = None,
-    district_name: Optional[str] = None,
+    category_slug: Optional[str] = None,
+    district_slug: Optional[str] = None,
     search: Optional[str] = None,
     status: PostStatus = None,
     db: Session = Depends(get_db)
 ):
     query = db.query(Post)
-    
-    # Sadece onaylı yazıları göster
     query = query.filter(Post.status == PostStatus.APPROVED)
-    
-    # Kategori filtresi (isimle)
-    if category_name:
-        query = query.join(Post.category).filter(Category.name.ilike(f"%{category_name}%"))
-    
-    # İlçe filtresi (isimle)
-    if district_name:
-        query = query.join(Post.district).filter(District.name.ilike(f"%{district_name}%"))
-    
-    # Arama filtresi
+
+    if category_slug:
+        query = query.join(Post.category).filter(Category.slug == category_slug)
+    if district_slug:
+        query = query.join(Post.district).filter(District.slug == district_slug)
     if search:
         search = f"%{search}%"
         query = query.filter(
             (Post.title.ilike(search)) |
             (Post.content.ilike(search))
         )
-    
     posts = query
     return posts
 
@@ -149,34 +142,26 @@ async def get_featured_posts(
     limit: int = 10,
     db: Session = Depends(get_db)
 ):
-    posts = db.query(Post).filter(
+    posts = db.query(Post).options(joinedload(Post.category)).filter(
         Post.is_featured == True,
         Post.status == PostStatus.APPROVED,
         Post.is_active == True
-    ).offset(skip).limit(limit).all()
+    ).order_by(Post.featured_order.asc()).offset(skip).limit(limit).all()
 
-    # Sadece gerekli alanları dön
-    result = []
     for post in posts:
-        # Blocks içinden metin içeriğini çıkar
         summary = ""
         if post.blocks:
-            for block in post.blocks:
-                if block.get('type') == 'text' and block.get('content'):
-                    summary += block['content'] + " "
-                    if len(summary) > 100:
-                        summary = summary[:100] + "..."
-                        break
+            # Sadece ilk metin bloğunu özet olarak alalım
+            text_block = next((block for block in post.blocks if block.get('type') == 'text' and block.get('content')), None)
+            if text_block:
+                content = text_block['content']
+                summary = (content[:150] + '...') if len(content) > 150 else content
+            else: # Metin bloğu yoksa ilk 150 karakteri al
+                summary = (post.content[:150] + '...') if post.content and len(post.content) > 150 else post.content
+        
+        post.summary = summary
 
-        result.append({
-            "id": post.id,
-            "title": post.title,
-            "cover_image": post.cover_image,
-            "category": {"name": post.category.name} if post.category else None,
-            "summary": summary,
-            "slug": post.slug
-        })
-    return result
+    return posts
 
 @router.get("/map-posts", response_model=List[MapPost])
 def get_map_posts(db: Session = Depends(get_db)):
@@ -242,6 +227,14 @@ async def get_all_posts(
     
     posts = query.offset(skip).limit(limit).all()
     return posts
+
+@router.get("/admin/count")
+def get_posts_count(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_editor_or_admin)
+):
+    count = db.query(Post).count()
+    return {"count": count}
 
 @router.put("/{post_id}", response_model=PostSchema)
 async def update_post(
@@ -368,3 +361,28 @@ def get_post_by_slug(slug: str, db: Session = Depends(get_db)):
     if not post:
         raise HTTPException(status_code=404, detail="Post bulunamadı")
     return post
+
+class UpdateFeaturedOrder(BaseModel):
+    post_ids: List[int]
+
+@router.post("/featured/order", status_code=status.HTTP_200_OK)
+async def set_featured_order(
+    payload: UpdateFeaturedOrder,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    # Reset featured status and order for all posts that are currently featured
+    db.query(Post).filter(Post.is_featured == True).update({
+        "is_featured": False,
+        "featured_order": None
+    }, synchronize_session=False)
+
+    # Set new featured status and order for the provided post IDs
+    for index, post_id in enumerate(payload.post_ids):
+        db.query(Post).filter(Post.id == post_id).update({
+            "is_featured": True,
+            "featured_order": index
+        }, synchronize_session=False)
+    
+    db.commit()
+    return {"message": "Featured posts order has been updated successfully."}

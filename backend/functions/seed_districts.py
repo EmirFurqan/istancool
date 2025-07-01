@@ -2,11 +2,19 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models.district import District, DistrictRegion
 from config import DATABASE_URL
+import unicodedata
 
 # Veritabanı bağlantısı
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 db = SessionLocal()
+
+def slugify(value):
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = value.lower().replace('ı', 'i').replace('ç', 'c').replace('ş', 's').replace('ğ', 'g').replace('ü', 'u').replace('ö', 'o')
+    value = value.replace(' ', '-')
+    value = ''.join(char for char in value if char.isalnum() or char == '-')
+    return value
 
 # İstanbul ilçeleri
 districts = [
@@ -61,7 +69,8 @@ def seed_districts():
         
         # Yeni ilçeleri ekle
         for district_data in districts:
-            district = District(**district_data)
+            slug = slugify(district_data['name'])
+            district = District(name=district_data['name'], region=district_data['region'], slug=slug)
             db.add(district)
         
         db.commit()

@@ -67,4 +67,15 @@ export const authService = {
   getToken() {
     return Cookies.get('token');
   },
+
+  getAuthHeaders() {
+    const token = this.getToken();
+    if (!token) {
+      return { 'Content-Type': 'application/json' };
+    }
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    };
+  },
 }; 

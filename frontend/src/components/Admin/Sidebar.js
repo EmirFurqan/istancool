@@ -147,9 +147,9 @@ export default function Sidebar({ children }) {
     return (
         <aside className="min-h-screen sticky top-0 z-10">
             <nav className="h-full flex flex-col shadow-md bg-white">
-                <div className="py-3 pt-6 flex justify-between items-center px-3">
-                    <Link href="/">
-                        <p className={`overflow-hidden transition-all font-bruno text-3xl cursor-pointer duration-500  ${expanded ? "w-32" : "w-0"}`}>istancool</p>
+                <div className="py-6 pt-6 flex justify-between items-center px-3">
+                    <Link href="/" >
+                        <img src="/logo.png" height={100} className={`overflow-hidden transition-all font-bruno h-auto cursor-pointer duration-500  ${expanded ? "w-20" : "w-0"}`}></img>
                     </Link>
                     <button onClick={() => setExpanded((curr) => !curr)} className="p-1.5 rounded-lg hover:bg-gray-100 text-secondary">
                         {expanded ? <ChevronFirst /> : <ChevronLast />}
@@ -177,18 +177,20 @@ export function SidebarItem({ icon, text, to }) {
     };
 
     return (
-        <Link href={to} legacyBehavior>
-           <a onClick={handleClick} className={`relative flex items-center py-3 px-3.5 mb-2 rounded-full cursor-pointer transition-colors group
-                ${isActive ? "bg-gradient-to-tr from-gray-100 to-gray-50 text-secondary" : "hover:bg-gray-100 text-secondary"}`}>
-                {icon}
-                <span className={`overflow-hidden transition-all font-semibold whitespace-nowrap text-sm duration-500 ${expanded ? "w-44 ml-4" : "w-0"}`}>{text}</span>
+        <Link
+            href={to}
+            onClick={handleClick}
+            className={`relative flex items-center py-3 px-3.5 mb-2 rounded-full cursor-pointer transition-colors group
+                ${isActive ? "bg-gradient-to-tr from-gray-100 to-gray-50 text-secondary" : "hover:bg-gray-100 text-secondary"}`}
+        >
+            {icon}
+            <span className={`overflow-hidden transition-all font-semibold whitespace-nowrap text-sm duration-500 ${expanded ? "w-44 ml-4" : "w-0"}`}>{text}</span>
 
-                {!expanded && (
-                    <div className={`absolute left-full rounded-md px-2 py-1 ml-6 bg-gray-300 text-secondary text-sm invisible opacity-20 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 whitespace-nowrap`}>
-                        {text}
-                    </div>
-                )}
-            </a>
+            {!expanded && (
+                <div className={`absolute left-full rounded-md px-2 py-1 ml-6 bg-gray-300 text-secondary text-sm invisible opacity-20 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 whitespace-nowrap`}>
+                    {text}
+                </div>
+            )}
         </Link>
     );
 } 

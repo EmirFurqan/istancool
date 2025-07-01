@@ -7,4 +7,5 @@ pydantic==2.5.2
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.6
-cloudinary==1.41.0 
+cloudinary==1.41.0
+alembic 

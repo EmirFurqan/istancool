@@ -40,17 +40,24 @@ export default function AdminPostsPage() {
     }
   };
 
-
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div>
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-800">Yazı Yönetimi</h1>
-        <Link
-          href="/addpost"
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-        >
-          Yeni Yazı Ekle
-        </Link>
+        <div className="flex gap-4">
+          <Link
+            href="/admin/featured"
+            className="rounded bg-amber-500 px-4 py-2 text-white hover:bg-amber-600 transition-colors"
+          >
+            Öne Çıkanları Yönet
+          </Link>
+          <Link
+            href="/admin/addpost"
+            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition-colors"
+          >
+            Yeni Yazı Ekle
+          </Link>
+        </div>
       </div>
       
       {error && (
@@ -81,15 +88,15 @@ export default function AdminPostsPage() {
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{post.category?.name || 'N/A'}</td>
                     <td className="whitespace-nowrap px-6 py-4">
                         <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-                            post.status === 'APPROVED' ? 'bg-green-100 text-green-800' : 
-                            post.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                            post.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                            post.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                             'bg-red-100 text-red-800'
                         }`}>
                             {post.status}
                         </span>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                      <Link href={`/admin/posts/edit/${post.slug}`} className="text-indigo-600 hover:text-indigo-900">
+                      <Link href={`/admin/posts/edit/${post.id}`} className="text-indigo-600 hover:text-indigo-900">
                         Düzenle
                       </Link>
                       <button onClick={() => handleDeletePost(post.id)} className="ml-4 text-red-600 hover:text-red-900">
