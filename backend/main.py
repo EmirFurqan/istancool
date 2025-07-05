@@ -14,7 +14,8 @@ app = FastAPI(title="istancool Blog API", description="Blog sitesi için REST AP
 origins = [
     "http://localhost:3000",  # Frontend URL'i
     "http://localhost:8000",
-    "https://istancool.vercel.app",  # Backend URL'i
+    "https://istan.cool",
+    "https://www.istan.cool",  # Backend URL'i
 ]
 
 app.add_middleware(
