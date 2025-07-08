@@ -86,7 +86,6 @@ export default function Home() {
       <FeaturedPosts posts={featuredPosts} loading={loading} />
       <Categories />
       <DistrictListSection />
-      <IstanbulMap />
 
       <Footer />
     </main>
